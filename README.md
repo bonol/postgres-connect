@@ -37,6 +37,48 @@ source .venv/bin/activate
 python postgres-connect.py
 ```
 
+## Test (STDIO smoke test)
+
+This runs the server as a child process, performs the MCP initialize handshake,
+lists tools, and calls `query_data_read` with `select 1 as ok`.
+
+```bash
+source .venv/bin/activate
+python scripts/stdio_smoketest.py
+```
+
+If initialization fails due to protocol version mismatch, the script retries with
+the server's supported protocol version and prints it.
+
+## Tools
+
+The MCP server exposes these tools:
+
+- `query_data_read(sql_query: str)`
+- `get_table_schema(table_name: str, schema_name: str | None = None)`
+- `get_table_indexes(table_name: str, schema_name: str | None = None)`
+- `get_table_functions(table_name: str, schema_name: str | None = None)`
+
+### Examples
+
+Fetch table columns and constraints:
+
+```json
+{"tool": "get_table_schema", "args": {"table_name": "users", "schema_name": "public"}}
+```
+
+Fetch index definitions:
+
+```json
+{"tool": "get_table_indexes", "args": {"table_name": "users", "schema_name": "public"}}
+```
+
+Fetch trigger-linked functions:
+
+```json
+{"tool": "get_table_functions", "args": {"table_name": "users", "schema_name": "public"}}
+```
+
 ## Limitations
 
 - Only single-statement `SELECT` or `WITH` queries are allowed.
